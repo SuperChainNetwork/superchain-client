@@ -22,11 +22,6 @@ base64 = "0.13.0"
 [dev-dependencies]
 tokio = { version = "1.21.1", features = ["rt-multi-thread"] }
 
-[features]
-default = ["http", "ws"]
-http = ["reqwest", "url"]
-ws = ["bitflags", "serde_cbor", "tokio-tungstenite", "tungstenite"]
-
 [package.metadata.docs.rs]
 all-features = true
 rustdoc-args = ["--cfg=docsrs"]

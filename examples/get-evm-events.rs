@@ -1,9 +1,6 @@
-#[cfg(not(feature = "ws"))]
-compile_error!("This example requires the `ws` feature");
-
-// A lot of crates that you might need are reexported from `sc-gateway`
+// A lot of crates that you might need are reexported from `superchain-client`
 // Checkout the `[dev-dependencies]` section for deps that you might have to include manually
-use sc_gateway::{futures::StreamExt, tokio_tungstenite::connect_async, WsClient};
+use superchain_client::{futures::StreamExt, tokio_tungstenite::connect_async, WsClient};
 
 /// The websocket endpoint url
 const URL: &str = "ws://localhost:8080/websocket";

@@ -116,7 +116,7 @@ impl Client {
     pub async fn get_evm_events(
         &self,
     ) -> Result<impl Stream<Item = std::io::Result<Vec<u8>>> + Send> {
-        self.request_raw(Operation::GetEvmEvents).await
+        self.raw_request(Operation::GetEvmEvents).await
     }
 
     async fn request<T>(&self, operation: Operation) -> Result<impl Stream<Item = Result<T>> + Send>
@@ -138,13 +138,12 @@ impl Client {
         operation: Operation,
     ) -> Result<impl Stream<Item = Result<Vec<u8>, std::io::Error>> + Send> {
         let (tx, rx) = mpsc::unbounded_channel();
-
         self.backend_tx
             .send((operation, tx))
             .await
             .map_err(|_| Error::BackendShutDown)?;
 
-        Ok(futures::stream::unfold(rx, |mut rx| async move {
+        let raw_data_stream = futures::stream::unfold(rx, |mut rx| async move {
             let res = rx.recv().await?;
 
             match res {

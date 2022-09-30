@@ -297,7 +297,7 @@ struct Request {
 
 #[derive(Clone, serde::Serialize)]
 #[serde(tag = "operation", rename_all = "camelCase")]
-pub enum Operation {
+enum Operation {
     GetPairs {
         pairs: Vec<[u8; 20]>,
         start: Option<u64>,

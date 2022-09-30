@@ -147,8 +147,6 @@ impl Client {
         Ok(futures::stream::unfold(rx, |mut rx| async move {
             let res = rx.recv().await?;
 
-            // Some((res.map(), rx))
-
             match res {
                 Ok(data) => Some((Ok(data), rx)),
                 Err(err) => Some((Err(std::io::Error::new(std::io::ErrorKind::Other, err)), rx)),

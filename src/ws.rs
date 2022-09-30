@@ -111,6 +111,14 @@ impl Client {
         Ok(u64::from_ne_bytes(bytes))
     }
 
+    /// Returns a stream of JSON encoded EVM events (decoded transactions and logs)
+    /// from the head of the chain.
+    pub async fn get_evm_events(
+        &self,
+    ) -> Result<impl Stream<Item = std::io::Result<Vec<u8>>> + Send> {
+        self.request_raw(Operation::GetEvmEvents).await
+    }
+
     async fn request<T>(&self, operation: Operation) -> Result<impl Stream<Item = Result<T>> + Send>
     where
         T: serde::de::DeserializeOwned + 'static,
@@ -130,13 +138,16 @@ impl Client {
         operation: Operation,
     ) -> Result<impl Stream<Item = Result<Vec<u8>, std::io::Error>> + Send> {
         let (tx, rx) = mpsc::unbounded_channel();
+
         self.backend_tx
             .send((operation, tx))
             .await
             .map_err(|_| Error::BackendShutDown)?;
 
-        let raw_data_stream = futures::stream::unfold(rx, |mut rx| async move {
+        Ok(futures::stream::unfold(rx, |mut rx| async move {
             let res = rx.recv().await?;
+
+            // Some((res.map(), rx))
 
             match res {
                 Ok(data) => Some((Ok(data), rx)),
@@ -191,11 +202,10 @@ where
 
             match either {
                 Either::Left(Some(msg)) => self.handle_msg(msg?).await?,
-                Either::Left(None) => break,
                 Either::Right(Some((operation, sender))) => {
                     self.send_request(operation, sender).await?
                 }
-                Either::Right(None) => break,
+                Either::Left(None) | Either::Right(None) => break,
             }
         }
 
@@ -287,9 +297,9 @@ struct Request {
     operation: Operation,
 }
 
-#[derive(serde::Serialize)]
+#[derive(Clone, serde::Serialize)]
 #[serde(tag = "operation", rename_all = "camelCase")]
-enum Operation {
+pub enum Operation {
     GetPairs {
         pairs: Vec<[u8; 20]>,
         start: Option<u64>,
@@ -306,6 +316,7 @@ enum Operation {
         end: Option<u64>,
     },
     GetHeight,
+    GetEvmEvents,
 }
 
 struct Header {

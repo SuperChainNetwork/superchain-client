@@ -8,7 +8,7 @@ use tokio_tungstenite::WebSocketStream;
 use tungstenite::Message;
 
 use crate::{
-    types::{Block, PairCreated, Price, Reserves},
+    types::{BlockHeader, PairCreated, Price, Reserves},
     Error, QueryOptions, Result,
 };
 
@@ -92,11 +92,11 @@ impl Client {
         .await
     }
 
-    pub async fn get_blocks(
+    pub async fn get_headers(
         &self,
         opts: QueryOptions,
-    ) -> Result<impl Stream<Item = Result<Block>> + Send> {
-        self.request(Operation::GetBlocks { opts }).await
+    ) -> Result<impl Stream<Item = Result<BlockHeader>> + Send> {
+        self.request(Operation::GetBlockHeaders { opts }).await
     }
 
     pub async fn get_height(&self) -> Result<u64> {
@@ -306,7 +306,7 @@ enum Operation {
         #[serde(flatten)]
         opts: QueryOptions,
     },
-    GetBlocks {
+    GetBlockHeaders {
         #[serde(flatten)]
         opts: QueryOptions,
     },

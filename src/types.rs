@@ -96,9 +96,9 @@ pub struct Reserves {
 }
 
 #[derive(Clone, Debug, Deserialize)]
-pub struct Block {
+pub struct BlockHeader {
     pub hash: U256,
-    pub height: i64,
+    pub block_number: u64,
     pub timestamp: i64,
 }
 

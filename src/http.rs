@@ -2,7 +2,7 @@ use ethers::types::H160;
 use futures::{Stream, StreamExt, TryStreamExt};
 
 use crate::{
-    types::{Block, PairCreated, Price, Reserves},
+    types::{BlockHeader, PairCreated, Price, Reserves},
     Error, QueryOptions, Result,
 };
 
@@ -67,11 +67,11 @@ impl Client {
     }
 
     /// Get the block headers
-    pub async fn get_blocks(
+    pub async fn get_headers(
         &self,
         opts: QueryOptions,
-    ) -> Result<impl Stream<Item = Result<Block>> + Send> {
-        let url = self.base_url.join("/api/eth/blocks/")?;
+    ) -> Result<impl Stream<Item = Result<BlockHeader>> + Send> {
+        let url = self.base_url.join("/api/eth/headers/")?;
         self.request(url, opts).await
     }
 

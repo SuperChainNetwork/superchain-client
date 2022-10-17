@@ -8,7 +8,7 @@ use superchain_client::{
     futures::{self, StreamExt},
     reqwest::{header::HeaderMap, Client},
     url::Url,
-    HttpClient,
+    HttpClient, QueryOptions,
 };
 
 /// The pair we want to receive prices for
@@ -38,7 +38,7 @@ async fn main() {
     // Then we tell the HttpClient that we want uniswap v2 prices
     let pair = H160::from_str(PAIR).unwrap();
     let stream = client
-        .get_prices_live_stream(pair, FROM_BLOCK)
+        .get_prices(pair, QueryOptions::default().start(FROM_BLOCK))
         .await
         .unwrap();
     futures::pin_mut!(stream);

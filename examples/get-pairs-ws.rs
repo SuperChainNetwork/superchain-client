@@ -4,9 +4,8 @@ use std::str::FromStr;
 // Checkout the `[dev-dependencies]` section for deps that you might have to include manually
 use superchain_client::{
     config::Config, ethers::types::H160, futures::StreamExt, tokio_tungstenite::connect_async,
-    WsClient,
+    QueryOptions, WsClient,
 };
-
 use tungstenite::{client::IntoClientRequest, http::header::AUTHORIZATION};
 
 /// The list of pairs we want to receive event for
@@ -42,7 +41,12 @@ async fn main() {
         .iter()
         .map(|pair| H160::from_str(pair).unwrap());
     let stream = client
-        .get_pairs_created(pairs, FROM_BLOCK, TO_BLOCK_INC)
+        .get_pairs_created(
+            pairs,
+            QueryOptions::default()
+                .with_start(FROM_BLOCK)
+                .with_end(TO_BLOCK_INC),
+        )
         .await
         .unwrap();
     futures::pin_mut!(stream);

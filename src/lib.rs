@@ -38,7 +38,7 @@ pub use ::{ethers, futures, reqwest, tokio, tokio_tungstenite, tungstenite, url}
 pub use crate::{
     error::{Error, Result},
     http::Client as HttpClient,
-    types::{PairCreated, Price, Reserves, Side, Type},
+    types::{PairCreated, Price, QueryOptions, Reserves, Side, Type},
     ws::Client as WsClient,
 };
 

@@ -8,7 +8,7 @@ use superchain_client::{
     futures::StreamExt,
     reqwest::{header::HeaderMap, Client},
     url::Url,
-    HttpClient,
+    HttpClient, QueryOptions,
 };
 
 /// The pair we want to receive the PairCreated event for
@@ -39,7 +39,7 @@ async fn main() {
     // Then we tell the HttpClient that we want uniswap v2 reserves
     let pair = H160::from_str(PAIR).unwrap();
     let stream = client
-        .get_reserves_live_stream(pair, FROM_BLOCK)
+        .get_reserves(pair, QueryOptions::default().start(FROM_BLOCK))
         .await
         .unwrap();
     futures::pin_mut!(stream);

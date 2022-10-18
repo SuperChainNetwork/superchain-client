@@ -1,4 +1,4 @@
-use ethers::types::{Address, H256, U128, U256};
+use ethers::types::{Address, H256, U256};
 use serde::{Deserialize, Serialize};
 use serde_repr::Deserialize_repr;
 
@@ -98,8 +98,8 @@ pub struct Reserves {
     pub transaction_hash: H256,
     pub transaction_index: i64,
     pub event: Type,
-    pub reserve0: U128,
-    pub reserve1: U128,
+    pub reserve0: u128,
+    pub reserve1: u128,
     pub amount0: U256,
     pub amount1: U256,
     pub lp_amount: U256,

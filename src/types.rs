@@ -1,4 +1,4 @@
-use ethers::types::{Address, H256, U256};
+use ethers::types::{Address, H256, U128, U256};
 use serde::{Deserialize, Serialize};
 use serde_repr::Deserialize_repr;
 
@@ -38,6 +38,13 @@ impl QueryOptions {
             ..self
         }
     }
+}
+
+#[derive(Clone, Debug, Deserialize)]
+pub struct BlockHeader {
+    pub hash: U256,
+    pub block_number: u64,
+    pub timestamp: i64,
 }
 
 /// A uniswap v2 `PairCreated` event
@@ -84,25 +91,22 @@ pub enum Side {
     Sell,
 }
 
-#[derive(Clone, Debug, Deserialize)]
+#[derive(Clone, Debug, serde::Deserialize, PartialEq, Eq)]
 pub struct Reserves {
+    pub block_number: i64,
+    pub timestamp: i64,
+    pub transaction_hash: H256,
+    pub transaction_index: i64,
     pub event: Type,
-    pub reserve0: u128,
-    pub reserve1: u128,
+    pub reserve0: U128,
+    pub reserve1: U128,
     pub amount0: U256,
     pub amount1: U256,
     pub lp_amount: U256,
     pub protocol_fee: Option<U256>,
 }
 
-#[derive(Clone, Debug, Deserialize)]
-pub struct BlockHeader {
-    pub hash: U256,
-    pub block_number: u64,
-    pub timestamp: i64,
-}
-
-#[derive(Clone, Copy, Debug, Deserialize_repr)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Deserialize_repr)]
 #[repr(u8)]
 pub enum Type {
     Mint,

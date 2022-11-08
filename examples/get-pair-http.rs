@@ -7,7 +7,7 @@ use superchain_client::{
     ethers::types::H160,
     reqwest::{header::HeaderMap, Client},
     url::Url,
-    HttpClient,
+    HttpClient, QueryOptions,
 };
 
 /// The pair we want to receive the PairCreated event for
@@ -39,7 +39,10 @@ async fn main() {
     // Then we tell the HttpClient that we want a specific pair
     let pair = H160::from_str(PAIR).unwrap();
     let pair = client
-        .get_pair_created_in_range(pair, FROM_BLOCK..=TO_BLOCK_INC)
+        .get_pair_created(
+            pair,
+            QueryOptions::default().start(FROM_BLOCK).end(TO_BLOCK_INC),
+        )
         .await
         .unwrap();
     // And that's it! Now we have the PairCreated event:

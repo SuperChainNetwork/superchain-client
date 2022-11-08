@@ -2,8 +2,8 @@ use ethers::types::H160;
 use futures::{Stream, StreamExt, TryStreamExt};
 
 use crate::{
-    types::{PairCreated, Price, Reserves},
-    Error, Result,
+    types::{BlockHeader, PairCreated, Price, Reserves},
+    Error, QueryOptions, Result,
 };
 
 /// A Superchain HTTP client
@@ -34,109 +34,45 @@ impl Client {
         self
     }
 
-    /// Get the uniswap v2 pair created event for the provided `pair`
-    pub async fn get_pair_created(&self, pair: H160) -> Result<Option<PairCreated>> {
-        self.get_pair_created_(format!("{:x}", pair)).await
-    }
-
-    /// Get the uniswap v2 pair created event for the provided `pair` within the specified
-    /// `block_range`
-    pub async fn get_pair_created_in_range(
+    /// Get the uniswap v2 pair created events for the provided `pair`
+    pub async fn get_pair_created(
         &self,
         pair: H160,
-        block_range: std::ops::RangeInclusive<u64>,
+        opts: QueryOptions,
     ) -> Result<Option<PairCreated>> {
-        self.get_pair_created_(format!(
-            "{:x}/{}/{}",
-            pair,
-            block_range.start(),
-            block_range.end()
-        ))
-        .await
+        let url = self.base_url.join(&format!("/api/eth/pair/{:x}", pair))?;
+        self.request(url, opts).await?.next().await.transpose()
     }
 
-    /// Get the uniswap v2 pair created event for the provided `pair` `from_block` upwards
-    /// following head
-    pub async fn get_pair_created_live_stream(
+    /// Get the uniswap v2 prices for the provided `pair`
+    pub async fn get_prices(
         &self,
         pair: H160,
-        from_block: u64,
-    ) -> Result<Option<PairCreated>> {
-        self.get_pair_created_(format!("{:x}/{}", pair, from_block))
-            .await
-    }
-
-    async fn get_pair_created_(&self, url_suffix: String) -> Result<Option<PairCreated>> {
-        let url = self.base_url.join("/api/eth/pair/")?.join(&url_suffix)?;
-        self.request(url).await?.next().await.transpose()
-    }
-
-    /// Get the uniswap v2 prices for the provided `pair` within the specified `block_range`
-    pub async fn get_prices_in_range(
-        &self,
-        pair: H160,
-        block_range: std::ops::RangeInclusive<u64>,
+        opts: QueryOptions,
     ) -> Result<impl Stream<Item = Result<Price>> + Send> {
-        self.get_prices(format!(
-            "{:x}/{}/{}",
-            pair,
-            block_range.start(),
-            block_range.end()
-        ))
-        .await
+        let url = self.base_url.join(&format!("/api/eth/prices/{:x}", pair))?;
+        self.request(url, opts).await
     }
 
-    /// Get the uniswap v2 prices for the provided `pair` `from_block` upwards following head
-    pub async fn get_prices_live_stream(
+    /// Get the uniswap v2 reserves for the provided `pair`
+    pub async fn get_reserves(
         &self,
         pair: H160,
-        from_block: u64,
-    ) -> Result<impl Stream<Item = Result<Price>> + Send> {
-        self.get_prices(format!("{:x}/{}", pair, from_block)).await
-    }
-
-    async fn get_prices(
-        &self,
-        url_suffix: String,
-    ) -> Result<impl Stream<Item = Result<Price>> + Send> {
-        let url = self.base_url.join("/api/eth/prices/")?.join(&url_suffix)?;
-        self.request(url).await
-    }
-
-    /// Get the uniswap v2 reserves for the provided `pair` within the specified `block_range`
-    pub async fn get_reserves_in_range(
-        &self,
-        pair: H160,
-        block_range: std::ops::RangeInclusive<u64>,
-    ) -> Result<impl Stream<Item = Result<Reserves>> + Send> {
-        self.get_reserves(format!(
-            "{:x}/{}/{}",
-            pair,
-            block_range.start(),
-            block_range.end()
-        ))
-        .await
-    }
-
-    /// Get the uniswap v2 reserves for the provided `pair` `from_block` upwards following head
-    pub async fn get_reserves_live_stream(
-        &self,
-        pair: H160,
-        from_block: u64,
-    ) -> Result<impl Stream<Item = Result<Reserves>> + Send> {
-        self.get_reserves(format!("{:x}/{}", pair, from_block))
-            .await
-    }
-
-    async fn get_reserves(
-        &self,
-        url_suffix: String,
+        opts: QueryOptions,
     ) -> Result<impl Stream<Item = Result<Reserves>> + Send> {
         let url = self
             .base_url
-            .join("/api/eth/reserves/")?
-            .join(&url_suffix)?;
-        self.request(url).await
+            .join(&format!("/api/eth/reserves/{:x}", pair))?;
+        self.request(url, opts).await
+    }
+
+    /// Get the block headers
+    pub async fn get_headers(
+        &self,
+        opts: QueryOptions,
+    ) -> Result<impl Stream<Item = Result<BlockHeader>> + Send> {
+        let url = self.base_url.join("/api/eth/headers/")?;
+        self.request(url, opts).await
     }
 
     pub async fn get_height(&self) -> Result<u64> {
@@ -151,13 +87,18 @@ impl Client {
         Ok(height)
     }
 
-    async fn request<T>(&self, url: url::Url) -> Result<impl Stream<Item = Result<T>> + Send>
+    async fn request<T>(
+        &self,
+        url: url::Url,
+        opts: QueryOptions,
+    ) -> Result<impl Stream<Item = Result<T>> + Send>
     where
         T: serde::de::DeserializeOwned + 'static,
     {
         let raw_data_stream = self
             .inner
             .get(url)
+            .query(&opts)
             .headers(self.headers.clone())
             .send()
             .await?

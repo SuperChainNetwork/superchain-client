@@ -8,8 +8,8 @@ use tokio_tungstenite::WebSocketStream;
 use tungstenite::Message;
 
 use crate::{
-    types::{PairCreated, Price, Reserves},
-    Error, Result,
+    types::{BlockHeader, PairCreated, Price, Reserves},
+    Error, QueryOptions, Result,
 };
 
 type WsMsg = Result<Vec<u8>>;
@@ -43,13 +43,11 @@ impl Client {
     pub async fn get_pairs_created(
         &self,
         pairs_filter: impl IntoIterator<Item = H160>,
-        from_block: Option<u64>,
-        to_block_inc: Option<u64>,
+        opts: QueryOptions,
     ) -> Result<impl Stream<Item = Result<PairCreated>> + Send> {
         self.request(Operation::GetPairs {
             pairs: pairs_filter.into_iter().map(|pair| pair.0).collect(),
-            start: from_block,
-            end: to_block_inc,
+            opts,
         })
         .await
     }
@@ -65,13 +63,11 @@ impl Client {
     pub async fn get_prices(
         &self,
         pairs_filter: impl IntoIterator<Item = H160>,
-        from_block: Option<u64>,
-        to_block_inc: Option<u64>,
+        opts: QueryOptions,
     ) -> Result<impl Stream<Item = Result<Price>> + Send> {
         self.request(Operation::GetPrices {
             pairs: pairs_filter.into_iter().map(|pair| pair.0).collect(),
-            start: from_block,
-            end: to_block_inc,
+            opts,
         })
         .await
     }
@@ -87,15 +83,20 @@ impl Client {
     pub async fn get_reserves(
         &self,
         pairs_filter: impl IntoIterator<Item = H160>,
-        from_block: Option<u64>,
-        to_block_inc: Option<u64>,
+        opts: QueryOptions,
     ) -> Result<impl Stream<Item = Result<Reserves>> + Send> {
         self.request(Operation::GetReserves {
             pairs: pairs_filter.into_iter().map(|pair| pair.0).collect(),
-            start: from_block,
-            end: to_block_inc,
+            opts,
         })
         .await
+    }
+
+    pub async fn get_headers(
+        &self,
+        opts: QueryOptions,
+    ) -> Result<impl Stream<Item = Result<BlockHeader>> + Send> {
+        self.request(Operation::GetBlockHeaders { opts }).await
     }
 
     pub async fn get_height(&self) -> Result<u64> {
@@ -292,18 +293,22 @@ struct Request {
 enum Operation {
     GetPairs {
         pairs: Vec<[u8; 20]>,
-        start: Option<u64>,
-        end: Option<u64>,
+        #[serde(flatten)]
+        opts: QueryOptions,
     },
     GetPrices {
         pairs: Vec<[u8; 20]>,
-        start: Option<u64>,
-        end: Option<u64>,
+        #[serde(flatten)]
+        opts: QueryOptions,
     },
     GetReserves {
         pairs: Vec<[u8; 20]>,
-        start: Option<u64>,
-        end: Option<u64>,
+        #[serde(flatten)]
+        opts: QueryOptions,
+    },
+    GetBlockHeaders {
+        #[serde(flatten)]
+        opts: QueryOptions,
     },
     GetHeight,
 }

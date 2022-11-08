@@ -1,9 +1,55 @@
 use ethers::types::{Address, H256, U256};
+use serde::{Deserialize, Serialize};
 use serde_repr::Deserialize_repr;
+
+/// Many queries can take a block range. To see how to use this as a parameter, see
+/// some examples.
+#[derive(Clone, Debug, Default, Serialize)]
+#[non_exhaustive]
+pub struct QueryOptions {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub start: Option<u64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub end: Option<u64>,
+}
+
+impl QueryOptions {
+    pub fn start(self, value: u64) -> Self {
+        Self {
+            start: Some(value),
+            ..self
+        }
+    }
+    pub fn end(self, value: u64) -> Self {
+        Self {
+            end: Some(value),
+            ..self
+        }
+    }
+    pub fn with_start(self, value: Option<u64>) -> Self {
+        Self {
+            start: value,
+            ..self
+        }
+    }
+    pub fn with_end(self, value: Option<u64>) -> Self {
+        Self {
+            start: value,
+            ..self
+        }
+    }
+}
+
+#[derive(Clone, Debug, Deserialize)]
+pub struct BlockHeader {
+    pub hash: U256,
+    pub block_number: u64,
+    pub timestamp: i64,
+}
 
 /// A uniswap v2 `PairCreated` event
 /// <https://docs.uniswap.org/protocol/V2/reference/smart-contracts/factory#paircreated>
-#[derive(Clone, Debug, serde::Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct PairCreated {
     pub block_number: u64,
     pub factory: Address,
@@ -17,7 +63,7 @@ pub struct PairCreated {
 }
 
 /// A uniswap v2 price quote
-#[derive(Clone, Debug, serde::Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct Price {
     pub block_number: u64,
     pub pair: Address,
@@ -37,7 +83,7 @@ pub struct Price {
 }
 
 /// The direction of transaction
-#[derive(Clone, Copy, Debug, serde::Deserialize)]
+#[derive(Clone, Copy, Debug, Deserialize)]
 pub enum Side {
     #[serde(rename = "true")]
     Buy,
@@ -45,8 +91,12 @@ pub enum Side {
     Sell,
 }
 
-#[derive(Clone, Debug, serde::Deserialize)]
+#[derive(Clone, Debug, serde::Deserialize, PartialEq, Eq)]
 pub struct Reserves {
+    pub block_number: i64,
+    pub timestamp: i64,
+    pub transaction_hash: H256,
+    pub transaction_index: i64,
     pub event: Type,
     pub reserve0: u128,
     pub reserve1: u128,
@@ -56,7 +106,7 @@ pub struct Reserves {
     pub protocol_fee: Option<U256>,
 }
 
-#[derive(Clone, Copy, Debug, Deserialize_repr)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Deserialize_repr)]
 #[repr(u8)]
 pub enum Type {
     Mint,

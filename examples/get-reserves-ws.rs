@@ -8,7 +8,7 @@ use superchain_client::{
     futures::{self, StreamExt},
     tokio_tungstenite::connect_async,
     tungstenite::{client::IntoClientRequest, http::header::AUTHORIZATION},
-    WsClient,
+    QueryOptions, WsClient,
 };
 
 /// The list of pairs we want to receive event for
@@ -44,7 +44,12 @@ async fn main() {
         .iter()
         .map(|pair| H160::from_str(pair).unwrap());
     let stream = client
-        .get_reserves(pairs, FROM_BLOCK, TO_BLOCK_INC)
+        .get_reserves(
+            pairs,
+            QueryOptions::default()
+                .with_start(FROM_BLOCK)
+                .with_end(TO_BLOCK_INC),
+        )
         .await
         .unwrap();
     futures::pin_mut!(stream);

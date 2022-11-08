@@ -248,7 +248,7 @@ where
     ) -> Result<()> {
         let id = self.allocate_id()?;
         let request = Request { id, operation };
-        let payload = serde_cbor::to_vec(&request)?;
+        let payload = serde_json::to_vec(&request)?;
 
         self.subscriptions[id as usize] = Some(sender);
         if let Err(err) = self.send_msg(Message::Binary(payload)).await {

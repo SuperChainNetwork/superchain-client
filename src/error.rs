@@ -44,7 +44,7 @@ pub enum Error {
     Reqwest(#[from] reqwest::Error),
     /// An error encountered during cbor parsing
     #[error(transparent)]
-    SerdeCbor(#[from] serde_cbor::Error),
+    SerdeJson(#[from] serde_json::Error),
     /// An error encountered during websocket handling
     #[error(transparent)]
     Tungstenite(#[from] tungstenite::Error),

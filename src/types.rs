@@ -1,4 +1,4 @@
-use ethers::types::{Address, H256, U256};
+use ethers::types::{Address, H256, U128, U256};
 use serde::{Deserialize, Serialize};
 use serde_repr::Deserialize_repr;
 
@@ -67,13 +67,14 @@ pub struct PairCreated {
 pub struct Price {
     pub block_number: u64,
     pub pair: Address,
-    pub sender: Address,
-    pub receiver: Address,
+    // actually u112
+    pub reserve0: U128,
+    pub reserve1: U128,
     pub price: f64,
     pub volume0: f64,
     pub volume1: f64,
-    pub fixed0: U256,
-    pub fixed1: U256,
+    pub fixed0: H256,
+    pub fixed1: H256,
     pub decimals0: u8,
     pub decimals1: u8,
     pub side: Side,
@@ -83,7 +84,7 @@ pub struct Price {
 }
 
 /// The direction of transaction
-#[derive(Clone, Copy, Debug, Deserialize)]
+#[derive(Clone, Copy, Debug, Deserialize, PartialEq, Eq)]
 pub enum Side {
     #[serde(rename = "true")]
     Buy,
@@ -113,4 +114,24 @@ pub enum Type {
     Burn,
     Swap,
     Sync,
+}
+
+#[derive(Clone, Debug, serde::Deserialize, PartialEq)]
+pub struct Trades {
+    pub block_number: i64,
+    pub pair: Address,
+    pub sender: Address,
+    pub receiver: Address,
+    pub price: f64,
+    pub last_traded_price: f64,
+    pub volume0: f64,
+    pub volume1: f64,
+    pub fixed0: U256,
+    pub fixed1: U256,
+    pub decimals0: u8,
+    pub decimals1: u8,
+    pub side: Side,
+    pub timestamp: i64,
+    pub transaction_hash: H256,
+    pub transaction_index: i64,
 }

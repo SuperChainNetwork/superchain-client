@@ -66,6 +66,16 @@ impl Client {
         self.request(url, opts).await
     }
 
+    /// Get the uniswap v2 trades for the provided `pair`
+    pub async fn get_trades(
+        &self,
+        pair: H160,
+        opts: QueryOptions,
+    ) -> Result<impl Stream<Item = Result<Reserves>> + Send> {
+        let url = self.base_url.join(&format!("/api/eth/trades/{:x}", pair))?;
+        self.request(url, opts).await
+    }
+
     /// Get the block headers
     pub async fn get_headers(
         &self,

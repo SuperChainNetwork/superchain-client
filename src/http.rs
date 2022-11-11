@@ -2,7 +2,7 @@ use ethers::types::H160;
 use futures::{Stream, StreamExt, TryStreamExt};
 
 use crate::{
-    types::{BlockHeader, PairCreated, Price, Reserves},
+    types::{BlockHeader, PairCreated, Price, Reserves, Trade},
     Error, QueryOptions, Result,
 };
 
@@ -63,6 +63,16 @@ impl Client {
         let url = self
             .base_url
             .join(&format!("/api/eth/reserves/{:x}", pair))?;
+        self.request(url, opts).await
+    }
+
+    /// Get the uniswap v2 trades for the provided `pair`
+    pub async fn get_trades(
+        &self,
+        pair: H160,
+        opts: QueryOptions,
+    ) -> Result<impl Stream<Item = Result<Trade>> + Send> {
+        let url = self.base_url.join(&format!("/api/eth/trades/{:x}", pair))?;
         self.request(url, opts).await
     }
 

@@ -8,7 +8,7 @@ use tokio_tungstenite::WebSocketStream;
 use tungstenite::Message;
 
 use crate::{
-    types::{BlockHeader, PairCreated, Price, Reserves},
+    types::{BlockHeader, PairCreated, Price, Reserves, Trade},
     Error, QueryOptions, Result,
 };
 
@@ -104,7 +104,7 @@ impl Client {
         &self,
         pairs_filter: impl IntoIterator<Item = H160>,
         opts: QueryOptions,
-    ) -> Result<impl Stream<Item = Result<Reserves>> + Send> {
+    ) -> Result<impl Stream<Item = Result<Trade>> + Send> {
         self.request(Operation::GetTrades {
             pairs: pairs_filter.into_iter().map(|pair| pair.0).collect(),
             opts,

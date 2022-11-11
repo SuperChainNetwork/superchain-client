@@ -69,15 +69,11 @@ pub struct Price {
     pub pair: Address,
     // actually u112
     pub reserve0: U128,
+    // actually u112
     pub reserve1: U128,
     pub price: f64,
-    pub volume0: f64,
-    pub volume1: f64,
-    pub fixed0: H256,
-    pub fixed1: H256,
     pub decimals0: u8,
     pub decimals1: u8,
-    pub side: Side,
     pub timestamp: i64,
     pub transaction_hash: H256,
     pub transaction_index: i64,
@@ -117,7 +113,7 @@ pub enum Type {
 }
 
 #[derive(Clone, Debug, serde::Deserialize, PartialEq)]
-pub struct Trades {
+pub struct Trade {
     pub block_number: i64,
     pub pair: Address,
     pub sender: Address,

@@ -66,7 +66,7 @@ pub struct PairCreated {
 #[derive(Clone, Debug, Deserialize)]
 pub struct Price {
     pub block_number: u64,
-    pub pair: Address,
+    pub address: Address,
     // actually u112
     pub reserve0: U128,
     // actually u112

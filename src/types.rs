@@ -114,7 +114,7 @@ pub enum Type {
 #[derive(Clone, Debug, serde::Deserialize, PartialEq)]
 pub struct Trade {
     pub block_number: i64,
-    pub pair: Address,
+    pub address: Address,
     pub sender: Address,
     pub receiver: Address,
     pub price: f64,

@@ -66,7 +66,7 @@ pub struct PairCreated {
 #[derive(Clone, Debug, Deserialize)]
 pub struct Price {
     pub block_number: u64,
-    pub pair: Address,
+    pub address: Address,
     // actually u112
     pub reserve0: U128,
     // actually u112
@@ -80,11 +80,10 @@ pub struct Price {
 }
 
 /// The direction of transaction
-#[derive(Clone, Copy, Debug, Deserialize, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, Deserialize_repr, PartialEq, Eq)]
+#[repr(u8)]
 pub enum Side {
-    #[serde(rename = "true")]
     Buy,
-    #[serde(rename = "false")]
     Sell,
 }
 
@@ -115,7 +114,7 @@ pub enum Type {
 #[derive(Clone, Debug, serde::Deserialize, PartialEq)]
 pub struct Trade {
     pub block_number: i64,
-    pub pair: Address,
+    pub address: Address,
     pub sender: Address,
     pub receiver: Address,
     pub price: f64,

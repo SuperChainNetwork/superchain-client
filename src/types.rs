@@ -80,11 +80,10 @@ pub struct Price {
 }
 
 /// The direction of transaction
-#[derive(Clone, Copy, Debug, Deserialize, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, Deserialize_repr, PartialEq, Eq)]
+#[repr(u8)]
 pub enum Side {
-    #[serde(rename = "true")]
     Buy,
-    #[serde(rename = "false")]
     Sell,
 }
 

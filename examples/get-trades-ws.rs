@@ -46,8 +46,8 @@ async fn main() {
         .get_trades(
             pairs,
             QueryOptions::default()
-                .with_start(FROM_BLOCK)
-                .with_end(TO_BLOCK_INC),
+                .start(FROM_BLOCK)
+                .end(TO_BLOCK_INC),
         )
         .await
         .unwrap();

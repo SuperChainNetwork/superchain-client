@@ -14,27 +14,15 @@ pub struct QueryOptions {
 }
 
 impl QueryOptions {
-    pub fn start(self, value: u64) -> Self {
+    pub fn start(self, value: impl Into<Option<u64>>) -> Self {
         Self {
-            start: Some(value),
+            start: value.into(),
             ..self
         }
     }
-    pub fn end(self, value: u64) -> Self {
+    pub fn end(self, value: impl Into<Option<u64>>) -> Self {
         Self {
-            end: Some(value),
-            ..self
-        }
-    }
-    pub fn with_start(self, value: Option<u64>) -> Self {
-        Self {
-            start: value,
-            ..self
-        }
-    }
-    pub fn with_end(self, value: Option<u64>) -> Self {
-        Self {
-            start: value,
+            end: value.into(),
             ..self
         }
     }
